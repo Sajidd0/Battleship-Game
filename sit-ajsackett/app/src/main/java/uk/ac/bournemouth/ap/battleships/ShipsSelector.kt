@@ -1,76 +1,71 @@
 package uk.ac.bournemouth.ap.battleships
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.content.Intent
+import android.graphics.*
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_COLUMNS
-import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_ROWS
-import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_SHIP_SIZES
+import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid
 import uk.ac.bournemouth.ap.battleshiplib.Ship
 import uk.ac.bournemouth.ap.battleshiplib.forEachIndex
-import java.lang.Integer.min
+import java.io.Serializable
 import kotlin.random.Random
 
-
-class BattleshipViewActivity : AppCompatActivity() {
+/*class ShipsSelector : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //val args = intent.getBundleExtra("BUNDLE")
-        //val getter:ArrayList<Ship> = args?.getSerializable("ARRAYLIST") as ArrayList<Ship>
-        setContentView(BattleshipView(this));
+        setContentView(ShipsView(this))
     }
 }
-class BattleshipView(context: Context) : View(context) {
+class ShipsView(context: Context) : View(context) {
     private var cellWidth: Int
     private var cellHeight: Int
 
     private val board: Array<IntArray>
-    private lateinit var ships: ArrayList<Ship>
+    var ships: List<Ship>
 
+    private val nextButtonRect = Rect(0, 0, 0, 0)
+    private val nextButtonPaint = Paint().apply {
+        color = Color.GREEN
+    }
+    private val titlePaint = Paint().apply {
+        textSize = 48f
+        color = Color.BLACK
+        textAlign = Paint.Align.CENTER
+    }
     init {
         // Calculate the width and height of each cell based on the size of the view
         val displayMetrics = resources.displayMetrics
-        cellWidth = displayMetrics.widthPixels / DEFAULT_COLUMNS
-        cellHeight = displayMetrics.heightPixels / DEFAULT_ROWS
+        cellWidth = displayMetrics.widthPixels / BattleshipGrid.DEFAULT_COLUMNS
+        cellHeight = displayMetrics.heightPixels / BattleshipGrid.DEFAULT_ROWS
 
         // Initialize the game board with empty cells
-        board = Array(DEFAULT_ROWS) { IntArray(DEFAULT_COLUMNS) }
+        board = Array(BattleshipGrid.DEFAULT_ROWS) { IntArray(BattleshipGrid.DEFAULT_COLUMNS) }
 
         // Place the ships on the game board
-        ships = placeShips(DEFAULT_SHIP_SIZES, DEFAULT_COLUMNS, DEFAULT_ROWS) as ArrayList<Ship>
-        this.ships=ships;
+        ships = placeShips(
+            BattleshipGrid.DEFAULT_SHIP_SIZES,
+            BattleshipGrid.DEFAULT_COLUMNS,
+            BattleshipGrid.DEFAULT_ROWS
+        )
     }
-
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
-        // Draw the game board
-        val boardPaint = Paint()
-        boardPaint.color = Color.WHITE
-        boardPaint.strokeWidth = 5f
-        canvas?.drawRect(0f, 0f, width.toFloat(), height.toFloat(), boardPaint)
-        //val cellSize = min((width.toFloat()*0.5).toInt(), (height.toFloat()*0.5).toInt()) / 10f
-
         val gridPaint = Paint()
         gridPaint.color = Color.BLACK
         gridPaint.strokeWidth = 5f
+        val startX = 0F
+        val startY = 100F
+        val cellSize = Integer.min(width, height) / 10f
+        cellWidth = (width / BattleshipGrid.DEFAULT_COLUMNS.toFloat()).toInt()
+        cellHeight = (height / BattleshipGrid.DEFAULT_ROWS.toFloat()).toInt()
         // Draw the grid lines
-        var cellSize = (min(width, height) / 10f)/2
-        cellWidth = ((width / DEFAULT_COLUMNS.toFloat())/2).toInt()
-        cellHeight = ((height / DEFAULT_ROWS.toFloat())/2).toInt()
-        // Calculate the starting position of the grid based on the view's dimensions
-        var startX = width - cellSize * 10
-        var startY = 20F
         for (i in 0..10) {
             val x = startX + i * cellSize
-            canvas?.drawLine(x, startY, x, startY + cellSize * 10, gridPaint)
+            canvas?.drawLine(x, startY.toFloat(), x, startY + cellSize * 10, gridPaint)
             canvas?.drawLine(
                 startX,
                 startY + i * cellSize,
@@ -78,7 +73,24 @@ class BattleshipView(context: Context) : View(context) {
                 startY + i * cellSize,
                 gridPaint
             )
+
         }
+        val centerX = width  / 2
+        val centerY =cellSize*10 +250F
+
+
+
+        // Calculate the rect for the next button
+        val playButtonWidth = 300
+        val playButtonHeight = 100
+        val playButtonLeft = centerX - playButtonWidth / 2
+        val playButtonTop = centerY - playButtonHeight / 2
+        val playButtonRight = centerX + playButtonWidth / 2
+        val playButtonBottom = centerY + playButtonHeight / 2
+        nextButtonRect.set(playButtonLeft, playButtonTop.toInt(), playButtonRight, playButtonBottom.toInt())
+        canvas?.drawRect(nextButtonRect, nextButtonPaint)
+        canvas?.drawText("Next", centerX.toFloat(),
+            ((playButtonTop+playButtonBottom)/2+10).toFloat(), titlePaint)
         val shipPaint = Paint()
         shipPaint.style=Paint.Style.STROKE
         shipPaint.color = Color.RED
@@ -92,10 +104,10 @@ class BattleshipView(context: Context) : View(context) {
             var top = startY + ship.top * cellSize
             val right = startX + (ship.right + 1) * cellSize
             val bottom = startY + (ship.bottom + 1) * cellSize
-            val rect=RectF(left, top, right, bottom)
+            val rect= RectF(left, top, right, bottom)
             canvas?.drawRect(rect, shipPaint)
             var j=0
-            while(j<DEFAULT_SHIP_SIZES[count])
+            while(j< BattleshipGrid.DEFAULT_SHIP_SIZES[count])
             {
 
                 if(right-left<cellSize)
@@ -106,39 +118,27 @@ class BattleshipView(context: Context) : View(context) {
                 {
                     left+=cellSize
                 }
-                canvas?.drawText(DEFAULT_SHIP_SIZES[count].toString(), left-cellSize+10, top+cellSize-10, textPaint)
+                canvas?.drawText(BattleshipGrid.DEFAULT_SHIP_SIZES[count].toString(), left-cellSize+10, top+cellSize-10, textPaint)
                 j++
             }
 
             count++;
 
         }
-        startX = 0F
-        startY = (height - cellSize * 10)/ 2
-        cellSize = min(width, height) / 10f
-        cellWidth = (width / DEFAULT_COLUMNS.toFloat()).toInt()
-        cellHeight = (height / DEFAULT_ROWS.toFloat()).toInt()
-        // Draw the grid lines
-        for (i in 0..10) {
-            val x = startX + i * cellSize
-            canvas?.drawLine(x, startY, x, startY + cellSize * 10, gridPaint)
-            canvas?.drawLine(
-                startX,
-                startY + i * cellSize,
-                startX + cellSize * 10,
-                startY + i * cellSize,
-                gridPaint
-            )
-
-        }
-        // Draw any ships that have been placed on the board
     }
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 val x = event.x.toInt()
                 val y = event.y.toInt()
+                if (nextButtonRect.contains(x, y)) {
+                    // Play button clicked, navigate to another activity
+                    val intent = Intent(context, BattleshipViewActivity::class.java)
+                    val args = Bundle()
+                    args.putParcelableArrayList("ARRAYLIST", ships);
+                    intent.putExtra("BUNDLE", args)
+                    context.startActivity(intent)
+                }
                 val cellX = x / cellWidth
                 val cellY = y / cellHeight
                 Log.d("screen","touched $cellX,$cellY")
@@ -164,7 +164,6 @@ class BattleshipView(context: Context) : View(context) {
         }
         return true
     }
-
     private fun placeShips(shipSizes: IntArray, columns: Int, rows: Int): List<Ship> {
         // Implement the logic to place the ships on the game board
         val ships = mutableListOf<Ship>()
@@ -185,7 +184,7 @@ class BattleshipView(context: Context) : View(context) {
                     override val bottom: Int = if (isHorizontal) startY else startY + size - 1
                     override val right: Int = if (isHorizontal) startX + size - 1 else startX
                 }
-                if (ship.left >= 0 && ship.right < DEFAULT_COLUMNS && ship.top >= 0 && ship.bottom < DEFAULT_ROWS) {
+                if (ship.left >= 0 && ship.right < BattleshipGrid.DEFAULT_COLUMNS && ship.top >= 0 && ship.bottom < BattleshipGrid.DEFAULT_ROWS) {
                     var overlaps = false
                     for (otherShip in ships) {
                         otherShip.forEachIndex { x, y ->
@@ -210,17 +209,4 @@ class BattleshipView(context: Context) : View(context) {
 
     }
 
-/* private fun getShipAt(x: Int, y: Int): Ship? {
-     // Implement the logic to get the ship at the given coordinates
-    val coordinate = Coordinate(y, x)
-      for (ship in ships) {
-     if (coordinate in ship.topLeft..ship.bottomRight) {
-         return ship
-     }
- }
- }
-
- private fun isShipSunk(s: Ship): Boolean {
-     // Implement the logic to check if the given ship has been sunk
- }*/
-}
+}*/
