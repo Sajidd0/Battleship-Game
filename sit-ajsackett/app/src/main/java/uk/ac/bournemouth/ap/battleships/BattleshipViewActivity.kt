@@ -10,11 +10,10 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import uk.ac.bournemouth.ap.battleshiplib.*
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_COLUMNS
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_ROWS
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_SHIP_SIZES
-import uk.ac.bournemouth.ap.battleshiplib.Ship
-import uk.ac.bournemouth.ap.battleshiplib.forEachIndex
 import java.lang.Integer.min
 import kotlin.random.Random
 
@@ -30,15 +29,18 @@ class BattleshipViewActivity : AppCompatActivity() {
 class BattleshipView(context: Context) : View(context) {
     private var cellWidth: Int
     private var cellHeight: Int
-
+    private var tempheight: Int
     private val board: Array<IntArray>
     private lateinit var ships: ArrayList<Ship>
 
+    val battleshipOpponent:BattleshipOpponent;
+    val grid:BattleshipGrid;
     init {
         // Calculate the width and height of each cell based on the size of the view
         val displayMetrics = resources.displayMetrics
         cellWidth = displayMetrics.widthPixels / DEFAULT_COLUMNS
         cellHeight = displayMetrics.heightPixels / DEFAULT_ROWS
+        tempheight=0;
 
         // Initialize the game board with empty cells
         board = Array(DEFAULT_ROWS) { IntArray(DEFAULT_COLUMNS) }
@@ -46,6 +48,8 @@ class BattleshipView(context: Context) : View(context) {
         // Place the ships on the game board
         ships = placeShips(DEFAULT_SHIP_SIZES, DEFAULT_COLUMNS, DEFAULT_ROWS) as ArrayList<Ship>
         this.ships=ships;
+        battleshipOpponent= MyBattleshipOpponent(10, 10, ships);
+        grid=BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipOpponent);
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -115,6 +119,7 @@ class BattleshipView(context: Context) : View(context) {
         }
         startX = 0F
         startY = (height - cellSize * 10)/ 2
+        tempheight= startY.toInt()
         cellSize = min(width, height) / 10f
         cellWidth = (width / DEFAULT_COLUMNS.toFloat()).toInt()
         cellHeight = (height / DEFAULT_ROWS.toFloat()).toInt()
@@ -138,10 +143,11 @@ class BattleshipView(context: Context) : View(context) {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 val x = event.x.toInt()
-                val y = event.y.toInt()
+                val y = event.y.toInt() -tempheight
                 val cellX = x / cellWidth
                 val cellY = y / cellHeight
                 Log.d("screen","touched $cellX,$cellY")
+                grid.shootAt(0,4);
                 /*if (board[cellY][cellX] == GuessResult.HIT()) {
                     // The cell contains a ship
                     board[cellY][cellX] = HIT
