@@ -5,10 +5,9 @@ class GuessCellImpl(
     override val row: Int,
     override val ship: Ship?
 ) : GuessCell {
-    private var _guess: Guess = Guess.EMPTY
+    public var _guess: Guess = Guess.EMPTY
 
-
-    override val state: GuessState
+    override var state: GuessState = TODO()
         get() = when (_guess) {
             Guess.EMPTY -> GuessState.UNKNOWN
             Guess.MISS -> GuessState.MISS
@@ -35,4 +34,8 @@ class GuessCellImpl(
             }
             _guess = value
         }
+
+    fun getGuess(): Guess {
+        return _guess;
+    }
 }

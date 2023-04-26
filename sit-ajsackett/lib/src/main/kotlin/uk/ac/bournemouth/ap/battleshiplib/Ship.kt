@@ -6,10 +6,10 @@ import uk.ac.bournemouth.ap.lib.matrix.MutableMatrix
 import uk.ac.bournemouth.ap.lib.matrix.ext.Coordinate
 
 interface Ship {
-    val top: Int
-    val left: Int
-    val bottom: Int
-    val right: Int
+    var top: Int
+    var left: Int
+    var bottom: Int
+    var right: Int
 
     val columnIndices: IntRange get() = left..right
     val rowIndices: IntRange get() = top..bottom

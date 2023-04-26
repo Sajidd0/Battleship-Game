@@ -15,6 +15,8 @@ import uk.ac.bournemouth.ap.battleshiplib.*
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_COLUMNS
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_ROWS
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_SHIP_SIZES
+import java.io.ByteArrayInputStream
+import java.io.ObjectInputStream
 import java.lang.Integer.min
 import kotlin.random.Random
 
@@ -24,18 +26,20 @@ class BattleshipViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //val args = intent.getBundleExtra("BUNDLE")
         //val getter:ArrayList<Ship> = args?.getSerializable("ARRAYLIST") as ArrayList<Ship>
-        setContentView(BattleshipView(this));
+        setContentView(BattleshipView(this, ships as ArrayList<Ship>));
     }
 }
-class BattleshipView(context: Context) : View(context) {
+class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
     private var cellWidth: Int
     private var cellHeight: Int
     private var tempheight: Int
     private val board: Array<IntArray>
     private lateinit var ships: ArrayList<Ship>
 
-    val battleshipOpponent:BattleshipOpponent;
-    val grid:BattleshipGrid;
+    val battleshipUser:BattleshipOpponent;
+    val battleshipComputer:BattleshipOpponent;
+    val computerGrid:BattleshipGrid;
+    val userGrid:BattleshipGrid;
     init {
         // Calculate the width and height of each cell based on the size of the view
         val displayMetrics = resources.displayMetrics
@@ -47,10 +51,12 @@ class BattleshipView(context: Context) : View(context) {
         board = Array(DEFAULT_ROWS) { IntArray(DEFAULT_COLUMNS) }
 
         // Place the ships on the game board
-        ships = placeShips(DEFAULT_SHIP_SIZES, DEFAULT_COLUMNS, DEFAULT_ROWS) as ArrayList<Ship>
+        //ships = placeShips(DEFAULT_SHIP_SIZES, DEFAULT_COLUMNS, DEFAULT_ROWS) as ArrayList<Ship>
         this.ships=ships;
-        battleshipOpponent= MyBattleshipOpponent(10, 10, ships);
-        grid=BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipOpponent);
+        battleshipUser= MyBattleshipOpponent(10, 10, ships);
+        battleshipComputer=MyBattleshipOpponent(10, 10, ships);
+        userGrid=BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipComputer);
+        computerGrid= BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipUser);
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -153,7 +159,7 @@ class BattleshipView(context: Context) : View(context) {
                 else
                 {
                     Log.d("screen","touched $cellX,$cellY")
-                    grid.shootAt(cellX,cellY);
+                    userGrid.shootAt(cellX,cellY);
                 }
                // val x = event.x.toInt()
                //
@@ -199,10 +205,10 @@ class BattleshipView(context: Context) : View(context) {
 
                 // Create the ship object
                 val ship: Ship = object : Ship {
-                    override val top: Int = startY
-                    override val left: Int = startX
-                    override val bottom: Int = if (isHorizontal) startY else startY + size - 1
-                    override val right: Int = if (isHorizontal) startX + size - 1 else startX
+                    override var top: Int = startY
+                    override var left: Int = startX
+                    override var bottom: Int = if (isHorizontal) startY else startY + size - 1
+                    override var right: Int = if (isHorizontal) startX + size - 1 else startX
                 }
                 if (ship.left >= 0 && ship.right < DEFAULT_COLUMNS && ship.top >= 0 && ship.bottom < DEFAULT_ROWS) {
                     var overlaps = false

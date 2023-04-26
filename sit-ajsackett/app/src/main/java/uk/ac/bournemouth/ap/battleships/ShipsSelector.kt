@@ -4,17 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid
 import uk.ac.bournemouth.ap.battleshiplib.Ship
 import uk.ac.bournemouth.ap.battleshiplib.forEachIndex
-import java.io.Serializable
 import kotlin.random.Random
+var ships: List<Ship> =ArrayList<Ship>()
 
-/*class ShipsSelector : AppCompatActivity() {
+class ShipsSelector : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(ShipsView(this))
@@ -25,8 +25,10 @@ class ShipsView(context: Context) : View(context) {
     private var cellHeight: Int
 
     private val board: Array<IntArray>
-    var ships: List<Ship>
 
+    private var selectedShip: Ship? = null
+    private var selectedShipX: Int = -1
+    private var selectedShipY: Int = -1
     private val nextButtonRect = Rect(0, 0, 0, 0)
     private val nextButtonPaint = Paint().apply {
         color = Color.GREEN
@@ -46,11 +48,7 @@ class ShipsView(context: Context) : View(context) {
         board = Array(BattleshipGrid.DEFAULT_ROWS) { IntArray(BattleshipGrid.DEFAULT_COLUMNS) }
 
         // Place the ships on the game board
-        ships = placeShips(
-            BattleshipGrid.DEFAULT_SHIP_SIZES,
-            BattleshipGrid.DEFAULT_COLUMNS,
-            BattleshipGrid.DEFAULT_ROWS
-        )
+        ships = placeShips( BattleshipGrid.DEFAULT_SHIP_SIZES, BattleshipGrid.DEFAULT_COLUMNS, BattleshipGrid.DEFAULT_ROWS)
     }
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -134,14 +132,59 @@ class ShipsView(context: Context) : View(context) {
                 if (nextButtonRect.contains(x, y)) {
                     // Play button clicked, navigate to another activity
                     val intent = Intent(context, BattleshipViewActivity::class.java)
-                    val args = Bundle()
-                    args.putParcelableArrayList("ARRAYLIST", ships);
-                    intent.putExtra("BUNDLE", args)
+                    //intent.putExtra("ships", ArrayList(ships))
                     context.startActivity(intent)
                 }
-                val cellX = x / cellWidth
-                val cellY = y / cellHeight
-                Log.d("screen","touched $cellX,$cellY")
+                for (ship in ships) {
+                    val left = ship.left * cellWidth
+                    val top = ship.top * cellHeight
+                    val right = (ship.right + 1) * cellWidth
+                    val bottom = (ship.bottom + 1) * cellHeight
+                    if (x >= left && x < right && y >= top && y < bottom) {
+                        // User tapped on this ship
+                        selectedShip = ship
+                        selectedShipX = x
+                        selectedShipY = y
+                        break
+                    }
+                }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                // Check if the user is dragging a ship
+                if (selectedShip != null) {
+                    val dx = event.x - selectedShipX
+                    val dy = event.y - selectedShipY
+                    selectedShipX = event.x.toInt()
+                    selectedShipY = event.y.toInt()
+                    // Update the position of the ship on the board
+                    val newLeft = ((selectedShip!!.left * cellWidth + dx) / cellWidth).coerceIn(0F,
+                        (BattleshipGrid.DEFAULT_COLUMNS - selectedShip!!.size).toFloat()
+                    )
+                    val newTop = ((selectedShip!!.top * cellHeight + dy) / cellHeight).coerceIn(0F,
+                        (BattleshipGrid.DEFAULT_ROWS - 1).toFloat()
+                    )
+                    val newRight = newLeft + selectedShip!!.size - 1
+                    val newBottom = newTop
+                    if (isValidShipPosition(newLeft, newTop, newRight, newBottom)) {
+                        selectedShip!!.left = newLeft.toInt()
+                        selectedShip!!.top = newTop.toInt()
+                        selectedShip!!.right = newRight.toInt()
+                        selectedShip!!.bottom = newBottom.toInt()
+                        invalidate()
+                    }
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                // User released the ship
+                selectedShip = null
+                selectedShipX = -1
+                selectedShipY = -1
+            }
+        }
+        return true
+                //val cellX = x / cellWidth
+                //val cellY = y / cellHeight
+                //Log.d("screen","touched $cellX,$cellY")
                 /*if (board[cellY][cellX] == GuessResult.HIT()) {
                     // The cell contains a ship
                     board[cellY][cellX] = HIT
@@ -159,8 +202,16 @@ class ShipsView(context: Context) : View(context) {
                     board[cellY][cellX] = MISS
                     // Update the UI to show that the cell has been missed
                 }*/
-                invalidate()
+
+    }
+    private fun isValidShipPosition(left: Float, top: Float, right: Float, bottom: Float): Boolean {
+        for (ship in ships) {
+            if (ship != selectedShip && (left <= ship.right && right >= ship.left && top <= ship.bottom && bottom >= ship.top)) {
+                // This ship overlaps with another ship on the board
+                Toast.makeText(context,"Your ship is overlapping",Toast.LENGTH_SHORT).show()
+                return false;
             }
+
         }
         return true
     }
@@ -179,10 +230,10 @@ class ShipsView(context: Context) : View(context) {
 
                 // Create the ship object
                 val ship: Ship = object : Ship {
-                    override val top: Int = startY
-                    override val left: Int = startX
-                    override val bottom: Int = if (isHorizontal) startY else startY + size - 1
-                    override val right: Int = if (isHorizontal) startX + size - 1 else startX
+                    override var top: Int = startY
+                    override var left: Int = startX
+                    override var bottom: Int = if (isHorizontal) startY else startY + size - 1
+                    override var right: Int = if (isHorizontal) startX + size - 1 else startX
                 }
                 if (ship.left >= 0 && ship.right < BattleshipGrid.DEFAULT_COLUMNS && ship.top >= 0 && ship.bottom < BattleshipGrid.DEFAULT_ROWS) {
                     var overlaps = false
@@ -209,4 +260,4 @@ class ShipsView(context: Context) : View(context) {
 
     }
 
-}*/
+}

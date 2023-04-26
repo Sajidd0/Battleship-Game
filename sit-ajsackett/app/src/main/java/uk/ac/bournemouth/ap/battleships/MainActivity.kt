@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
 
                     if (playButtonRect.contains(x, y)) {
                         // Play button clicked, navigate to another activity
-                        val intent = Intent(context, BattleshipViewActivity::class.java)
+                        val intent = Intent(context, ShipsSelector::class.java)
                         context.startActivity(intent)
                     } else if (exitButtonRect.contains(x, y)) {
                         // Exit button clicked, stop the application
