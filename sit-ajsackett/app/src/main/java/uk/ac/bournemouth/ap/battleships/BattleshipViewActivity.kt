@@ -159,9 +159,12 @@ class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
                 else
                 {
                     Log.d("screen","touched $cellX,$cellY")
-                    userGrid.shootAt(cellX,cellY);
+                    var cell:GuessResult= userGrid.shootAt(cellX,cellY);
+                    Log.d("state of user cell", cell.cell.state.toString())
+                    cell=computerGrid.computerMove();
+                    Log.d("state of machine cell", cell.cell.state.toString())
                 }
-               // val x = event.x.toInt()
+                // val x = event.x.toInt()
                //
                 //val cellX = x / cellWidth
                 //var cellY = (y*2) / cellHeight

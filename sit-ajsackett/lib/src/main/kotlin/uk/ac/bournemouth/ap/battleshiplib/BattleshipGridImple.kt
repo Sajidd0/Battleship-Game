@@ -80,7 +80,8 @@ class BattleshipGridImple(
         listeners.remove(listener)
     }
 
-    override fun computerMove() {
+    override fun computerMove() :GuessResult{
+        var cell:GuessResult;
         if (lastColumn > -1 && lastRow > -1) {
             val myList = mutableListOf<Pair>()
             var move1C = lastColumn - 1;
@@ -112,12 +113,13 @@ class BattleshipGridImple(
                 myList.add(pair3);
             }
             val randomIndex = Random.nextInt(myList.size)
-            shootAt(myList[randomIndex].getColumn(), myList[randomIndex].getRow())
+            cell=shootAt(myList[randomIndex].getColumn(), myList[randomIndex].getRow())
         }else{
             val emptyCells = grid.flatMap { it.asList() }
                 .filter { it.guess == Guess.EMPTY }
             val randomIndex = Random.nextInt(emptyCells.size)
-            shootAt(emptyCells[randomIndex].column, emptyCells[randomIndex].row)
+            cell=shootAt(emptyCells[randomIndex].column, emptyCells[randomIndex].row)
         }
+        return cell;
     }
 }
