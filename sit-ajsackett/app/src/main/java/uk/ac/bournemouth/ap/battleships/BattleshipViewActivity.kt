@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import uk.ac.bournemouth.ap.battleshiplib.*
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_COLUMNS
@@ -142,12 +143,24 @@ class BattleshipView(context: Context) : View(context) {
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
-                val x = event.x.toInt()
+                val cellSize = width / DEFAULT_COLUMNS // assuming NUM_COLUMNS is the number of columns in your grid
+                val cellX = event.x.toInt() / cellSize
                 val y = event.y.toInt() -tempheight
-                val cellX = x / cellWidth
-                val cellY = y / cellHeight
-                Log.d("screen","touched $cellX,$cellY")
-                grid.shootAt(0,4);
+                val cellY = y/ cellSize
+                if(cellX>9 || cellY>9){
+                    Toast.makeText(context,"Touch on the grid goddamnit!!",Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    Log.d("screen","touched $cellX,$cellY")
+                    grid.shootAt(cellX,cellY);
+                }
+               // val x = event.x.toInt()
+               //
+                //val cellX = x / cellWidth
+                //var cellY = (y*2) / cellHeight
+
+
                 /*if (board[cellY][cellX] == GuessResult.HIT()) {
                     // The cell contains a ship
                     board[cellY][cellX] = HIT

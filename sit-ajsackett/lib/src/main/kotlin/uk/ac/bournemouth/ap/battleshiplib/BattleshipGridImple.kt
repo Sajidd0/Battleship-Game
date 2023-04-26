@@ -14,9 +14,19 @@ class BattleshipGridImple(
     private val grid: Array<Array<GuessCell>> =
         Array(rows) { row ->
             Array(columns) { column ->
-                GuessCellImpl(column, row,null)
+
+                GuessCellImpl(column, row,findShip(column, row))
             }
         }
+    private fun findShip(column:Int, row:Int):Ship?{
+        for (ship in opponent.ships){
+            if(ship.matchShip(column,row))
+            {
+                return ship;
+            }
+        }
+        return null;
+    }
 
     private val cells = Array(columns) { column ->
         Array(rows) { row -> grid[row][column] }

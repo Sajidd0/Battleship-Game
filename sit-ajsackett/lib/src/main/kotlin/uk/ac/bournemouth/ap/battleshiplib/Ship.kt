@@ -40,3 +40,10 @@ inline fun <T> Ship.mapIndices(action: (Int, Int) -> T): Matrix<T> {
         action(mx+left, my+top)
     }
 }
+inline fun Ship.matchShip(column:Int, row:Int):Boolean{
+    if(column in columnIndices && row in rowIndices)
+    {
+        return true;
+    }
+    return false;
+}
