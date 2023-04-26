@@ -35,6 +35,8 @@ interface BattleshipGrid {
     /** Shortcut for using with coordinates. Returns the cell at the given coordinate. */
     fun shootAt(coordinate: Coordinate): GuessResult = shootAt(coordinate.x, coordinate.y)
 
+    fun computerMove();
+
     /**
      * Sequence of all coordinates in the grid. This helps with bulk operations.
      */

@@ -80,7 +80,7 @@ class BattleshipGridImple(
         listeners.remove(listener)
     }
 
-    fun computerMove() {
+    override fun computerMove() {
         if (lastColumn > -1 && lastRow > -1) {
             val myList = mutableListOf<Pair>()
             var move1C = lastColumn - 1;
