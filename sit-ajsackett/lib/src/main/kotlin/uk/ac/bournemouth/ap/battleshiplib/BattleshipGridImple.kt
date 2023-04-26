@@ -114,13 +114,10 @@ class BattleshipGridImple(
             val randomIndex = Random.nextInt(myList.size)
             shootAt(myList[randomIndex].getColumn(), myList[randomIndex].getRow())
         }else{
-            for (row in grid) {
-                for (cell in row) {
-                    // Do something with the cell
-                    // For example, print its coordinates:
-                    println("(${cell.row}, ${cell.column})")
-                }
-            }
+            val emptyCells = grid.flatMap { it.asList() }
+                .filter { it.guess == Guess.EMPTY }
+            val randomIndex = Random.nextInt(emptyCells.size)
+            shootAt(emptyCells[randomIndex].column, emptyCells[randomIndex].row)
         }
     }
 }

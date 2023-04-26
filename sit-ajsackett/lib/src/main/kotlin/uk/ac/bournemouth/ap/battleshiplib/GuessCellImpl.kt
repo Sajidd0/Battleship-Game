@@ -35,7 +35,4 @@ class GuessCellImpl(
             _guess = value
         }
 
-    fun getGuess(): Guess {
-        return _guess;
-    }
 }
