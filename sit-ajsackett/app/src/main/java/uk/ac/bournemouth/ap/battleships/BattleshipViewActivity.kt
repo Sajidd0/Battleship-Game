@@ -15,8 +15,6 @@ import uk.ac.bournemouth.ap.battleshiplib.*
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_COLUMNS
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_ROWS
 import uk.ac.bournemouth.ap.battleshiplib.BattleshipGrid.Companion.DEFAULT_SHIP_SIZES
-import java.io.ByteArrayInputStream
-import java.io.ObjectInputStream
 import java.lang.Integer.min
 import kotlin.random.Random
 
@@ -26,7 +24,7 @@ class BattleshipViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //val args = intent.getBundleExtra("BUNDLE")
         //val getter:ArrayList<Ship> = args?.getSerializable("ARRAYLIST") as ArrayList<Ship>
-        setContentView(BattleshipView(this, ships as ArrayList<Ship>));
+        setContentView(BattleshipView(this, ships as ArrayList<Ship>))
     }
 }
 class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
@@ -36,27 +34,27 @@ class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
     private val board: Array<IntArray>
     private lateinit var ships: ArrayList<Ship>
 
-    val battleshipUser:BattleshipOpponent;
-    val battleshipComputer:BattleshipOpponent;
-    val computerGrid:BattleshipGrid;
-    val userGrid:BattleshipGrid;
+    private val battleshipUser:BattleshipOpponent
+    private val battleshipComputer:BattleshipOpponent
+    private val computerGrid:BattleshipGrid
+    private val userGrid:BattleshipGrid
     init {
         // Calculate the width and height of each cell based on the size of the view
         val displayMetrics = resources.displayMetrics
         cellWidth = displayMetrics.widthPixels / DEFAULT_COLUMNS
         cellHeight = displayMetrics.heightPixels / DEFAULT_ROWS
-        tempheight=0;
+        tempheight=0
 
         // Initialize the game board with empty cells
         board = Array(DEFAULT_ROWS) { IntArray(DEFAULT_COLUMNS) }
 
         // Place the ships on the game board
         //ships = placeShips(DEFAULT_SHIP_SIZES, DEFAULT_COLUMNS, DEFAULT_ROWS) as ArrayList<Ship>
-        this.ships=ships;
-        battleshipUser= MyBattleshipOpponent(10, 10, ships);
-        battleshipComputer=MyBattleshipOpponent(10, 10, ships);
-        userGrid=BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipComputer);
-        computerGrid= BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipUser);
+        this.ships=ships
+        battleshipUser= MyBattleshipOpponent(10, 10, ships)
+        battleshipComputer=MyBattleshipOpponent(10, 10, ships)
+        userGrid=BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipComputer)
+        computerGrid= BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipUser)
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -95,9 +93,9 @@ class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
         shipPaint.color = Color.RED
         shipPaint.strokeWidth = 5f
         val textPaint=Paint()
-        textPaint.setColor(Color.RED);
-        textPaint.setTextSize((cellHeight / 2).toFloat());
-        var count=0;
+        textPaint.setColor(Color.RED)
+        textPaint.setTextSize((cellHeight / 2).toFloat())
+        var count=0
         for (ship in ships) {
             var left = startX + ship.left * cellSize
             var top = startY + ship.top * cellSize
@@ -121,7 +119,7 @@ class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
                 j++
             }
 
-            count++;
+            count++
 
         }
         startX = 0F
@@ -154,14 +152,14 @@ class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
                 val y = event.y.toInt() -tempheight
                 val cellY = y/ cellSize
                 if(cellX>9 || cellY>9){
-                    Toast.makeText(context,"Touch on the grid goddamnit!!",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context,"Touch on the grid goddamnit!!",Toast.LENGTH_SHORT).show()
                 }
                 else
                 {
                     Log.d("screen","touched $cellX,$cellY")
-                    var cell:GuessResult= userGrid.shootAt(cellX,cellY);
+                    var cell:GuessResult= userGrid.shootAt(cellX,cellY)
                     Log.d("state of user cell", cell.cell.state.toString())
-                    cell=computerGrid.computerMove();
+                    cell=computerGrid.computerMove()
                     Log.d("state of machine cell", cell.cell.state.toString())
                 }
                 // val x = event.x.toInt()
