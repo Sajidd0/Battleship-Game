@@ -35,7 +35,7 @@ class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
     private var tempheight: Int
     private val board: Array<IntArray>
     private lateinit var ships: ArrayList<Ship>
-
+    private var opponentships:ArrayList<Ship>
     val battleshipUser:BattleshipOpponent;
     val battleshipComputer:BattleshipOpponent;
     val computerGrid:BattleshipGrid;
@@ -51,9 +51,9 @@ class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
         board = Array(DEFAULT_ROWS) { IntArray(DEFAULT_COLUMNS) }
 
         // Place the ships on the game board
-        //ships = placeShips(DEFAULT_SHIP_SIZES, DEFAULT_COLUMNS, DEFAULT_ROWS) as ArrayList<Ship>
+        opponentships = placeShips(DEFAULT_SHIP_SIZES, DEFAULT_COLUMNS, DEFAULT_ROWS) as ArrayList<Ship>
         this.ships=ships;
-        battleshipUser= MyBattleshipOpponent(10, 10, ships);
+        battleshipUser= MyBattleshipOpponent(10, 10, opponentships);
         battleshipComputer=MyBattleshipOpponent(10, 10, ships);
         userGrid=BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipComputer);
         computerGrid= BattleshipGridImple(DEFAULT_COLUMNS, DEFAULT_ROWS,battleshipUser);
@@ -98,7 +98,7 @@ class BattleshipView(context: Context,ships:ArrayList<Ship>) : View(context) {
         textPaint.setColor(Color.RED);
         textPaint.setTextSize((cellHeight / 2).toFloat());
         var count=0;
-        for (ship in ships) {
+        for (ship in battleshipComputer.ships) {
             var left = startX + ship.left * cellSize
             var top = startY + ship.top * cellSize
             val right = startX + (ship.right + 1) * cellSize
