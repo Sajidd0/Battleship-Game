@@ -9,15 +9,16 @@ class BattleshipGridImple(
     override val opponent: BattleshipOpponent
 ) : BattleshipGrid {
     override val shipsSunk = BooleanArray(opponent.ships.size)
+    private var lastmoves: ArrayList<Pair> = ArrayList()
     var lastColumn: Int = -1;
     var lastRow: Int = -1;
+    var lastGuess:String="MISS"
     override val isFinished: Boolean
         get() = super.isFinished
 
     private val grid: Array<Array<GuessCell>> =
         Array(rows) { row ->
             Array(columns) { column ->
-
                 GuessCellImpl(column, row, findShip(column, row))
             }
         }
@@ -59,12 +60,16 @@ class BattleshipGridImple(
                     throw IllegalStateException("Cell contains ship that is not in opponent's list")
                 }
                 if (cells.any { it.any { it.ship == result.ship && it.state == GuessState.UNKNOWN } }) {
-                    cell.state=GuessState.HIT;
+                    cell.state = GuessState.HIT;
+                    lastGuess=GuessState.HIT.toString()
                 } else {
                     shipsSunk[shipIndex] = true
                 }
-            }else{
-                cell.state=GuessState.MISS;
+            } else {
+                cell.state = GuessState.MISS;
+                lastGuess=GuessState.MISS.toString()
+                lastColumn=-1
+                lastRow=-1
             }
         }
         listeners.forEach { it.onGridChanged(this, column, row) }
@@ -80,9 +85,9 @@ class BattleshipGridImple(
         listeners.remove(listener)
     }
 
-    override fun computerMove() :GuessResult{
-        var cell:GuessResult;
-        if (lastColumn > -1 && lastRow > -1) {
+    override fun computerMove(): GuessResult {
+        var cell: GuessResult;
+        if (lastColumn > -1 && lastRow > -1 && lastGuess=="HIT") {
             val myList = mutableListOf<Pair>()
             var move1C = lastColumn - 1;
             var move1R = lastRow;
@@ -96,30 +101,60 @@ class BattleshipGridImple(
             var move4C = lastColumn;
             var move4R = lastRow + 1;
 
-            if (move1C >= 0 && move1R >= 0) {
+            if (move1C >= 0 && move1R >= 0 && move1C <= 9 && move1R <= 9) {
                 var pair = Pair(move1C, move1R);
                 myList.add(pair);
             }
-            if (move2C >= 0 && move2R >= 0) {
+            if (move2C >= 0 && move2R >= 0 && move2C <= 9 && move2R <= 9) {
                 var pair1 = Pair(move2C, move2R);
                 myList.add(pair1);
             }
-            if (move3C >= 0 && move3R >= 0) {
+            if (move3C >= 0 && move3R >= 0 && move3C <= 9 && move3R <= 9) {
                 var pair2 = Pair(move3C, move3R);
                 myList.add(pair2);
             }
-            if (move4C >= 0 && move4R >= 0) {
+            if (move4C >= 0 && move4R >= 0 && move4C <= 9 && move4R <= 9) {
                 var pair3 = Pair(move4C, move4R);
                 myList.add(pair3);
             }
-            val randomIndex = Random.nextInt(myList.size)
-            cell=shootAt(myList[randomIndex].getColumn(), myList[randomIndex].getRow())
-        }else{
+            var pair: Pair
+            if(myList.isNotEmpty()) {
+                if (lastmoves.isNotEmpty()) {
+                    while (true) {
+                        val randomIndex = Random.nextInt(myList.size)
+                        pair = Pair(myList[randomIndex].getColumn(), myList[randomIndex].getRow())
+                        if (!pairMatches(pair)) {
+                            break
+                        }
+                    }
+                } else {
+                    val randomIndex = Random.nextInt(myList.size)
+                    pair = Pair(myList[randomIndex].getColumn(), myList[randomIndex].getRow())
+                }
+                cell = shootAt(pair.column, pair.row)
+                lastmoves.add(pair)
+            }else{
+                val emptyCells = grid.flatMap { it.asList() }
+                    .filter { it.guess == Guess.EMPTY }
+                var pair: Pair
+                val randomIndex = Random.nextInt(emptyCells.size)
+                pair = Pair(emptyCells[randomIndex].column, emptyCells[randomIndex].row)
+                cell = shootAt(pair.column, pair.row)
+                lastmoves.add(pair)
+            }
+        } else {
             val emptyCells = grid.flatMap { it.asList() }
                 .filter { it.guess == Guess.EMPTY }
+            var pair: Pair
             val randomIndex = Random.nextInt(emptyCells.size)
-            cell=shootAt(emptyCells[randomIndex].column, emptyCells[randomIndex].row)
+            pair = Pair(emptyCells[randomIndex].column, emptyCells[randomIndex].row)
+            cell = shootAt(pair.column, pair.row)
+            lastmoves.add(pair)
         }
         return cell;
+    }
+
+    fun pairMatches(pair: Pair): Boolean {
+        return lastmoves.any { it.column == pair.column && it.row == pair.row }
     }
 }

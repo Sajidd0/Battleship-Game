@@ -8,4 +8,5 @@ interface GuessCell {
     var guess: Guess
 
     fun shoot():GuessCell
+
 }

@@ -3,10 +3,8 @@ package uk.ac.bournemouth.ap.battleshiplib
 class Pair(
     var column: Int, var row: Int
 ) {
-    init {
-        column = 0;
-        row = 0;
-    }
+    init{}
+
     @JvmName("getColumn1")
     fun getColumn(): Int {
         return column

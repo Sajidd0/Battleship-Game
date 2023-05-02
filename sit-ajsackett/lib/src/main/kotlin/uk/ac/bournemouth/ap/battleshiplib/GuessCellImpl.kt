@@ -23,7 +23,7 @@ class GuessCellImpl(
             } else if (value == GuessState.MISS) {
                 _guess = Guess.MISS
             } else {
-                throw IllegalArgumentException("Invalid guess state")
+               _guess=Guess.EMPTY
             }
         }
 

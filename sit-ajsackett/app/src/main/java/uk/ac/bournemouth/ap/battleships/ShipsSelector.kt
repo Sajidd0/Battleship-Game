@@ -143,8 +143,8 @@ class ShipsView(context: Context) : View(context) {
                     if (x >= left && x < right && y >= top && y < bottom) {
                         // User tapped on this ship
                         selectedShip = ship
-                        selectedShipX = x
-                        selectedShipY = y
+                        selectedShipX = x -left
+                        selectedShipY = y -top
                         break
                     }
                 }

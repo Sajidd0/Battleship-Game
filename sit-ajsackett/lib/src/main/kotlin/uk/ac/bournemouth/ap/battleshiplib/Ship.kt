@@ -19,6 +19,7 @@ interface Ship {
     val size: Int get() = width*height
     val topLeft: Coordinate get() = Coordinate(top, left)
     val bottomRight: Coordinate get() = Coordinate(bottom, right)
+
 }
 
 inline fun Ship.forEachIndex(action: (Int, Int) -> Unit) {
